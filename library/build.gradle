@@ -1,4 +1,19 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'io.jitpack'
+            artifactId = 'appauth-webview'
+            version = '1.0'
+
+            afterEvaluate {
+                from components.findByName('release')
+            }
+        }
+    }
+}
 
 android {
     compileSdkVersion 35
