@@ -36,6 +36,7 @@ import net.openid.appauth.internal.Logger;
 
 import org.json.JSONException;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.UUID;
 
@@ -51,6 +52,7 @@ public class AppAuthWebView {
     private static int PAGE_LOAD_PROGRESS = 0;
     private String mCodeVerifier;
     private boolean isLogout = false;
+    private boolean loadFavicon;
 
     // From AppAuth Library
     private AuthorizationServiceConfiguration mAuthConfig;
@@ -64,6 +66,7 @@ public class AppAuthWebView {
         private AppAuthWebViewData mAppAuthWebViewData;
         private Context mContext;
         private long mConnectionTimeOut;
+        private boolean mLoadFavicon = true;
 
         public Builder listener(IAppAuthWebViewListener authWebViewListener) {
             mAuthWebViewListener = authWebViewListener;
@@ -86,13 +89,19 @@ public class AppAuthWebView {
             return this;
         }
 
+        public Builder setLoadFavicon(boolean loadFavicon) {
+            mLoadFavicon = loadFavicon;
+            return this;
+        }
+
         public AppAuthWebView build() {
             return new AppAuthWebView(
                     mContext,
                     mAuthWebViewListener,
                     mWebView,
                     mAppAuthWebViewData,
-                    mConnectionTimeOut
+                    mConnectionTimeOut,
+                    mLoadFavicon
             );
         }
     }
@@ -102,12 +111,14 @@ public class AppAuthWebView {
                            IAppAuthWebViewListener appAuthWebViewListener,
                            WebView webView,
                            AppAuthWebViewData appAuthWebViewData,
-                           long connectionTimeOut
+                           long connectionTimeOut,
+                           boolean loadFavicon
     ) {
         this.mAppAuthWebViewListener = appAuthWebViewListener;
         this.mWebView = webView;
         this.mAppAuthWebViewData = appAuthWebViewData;
         this.mConnectionTimeOut = connectionTimeOut == 0L ? 30000L : connectionTimeOut;
+        this.loadFavicon = loadFavicon;
         mContext = context;
 
         mAuthConfig = new AuthorizationServiceConfiguration(
@@ -378,6 +389,23 @@ public class AppAuthWebView {
         public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError rerr) {
             // Redirect to deprecated method, so you can use it in all SDK versions
             onReceivedError(view, rerr.getErrorCode(), rerr.getDescription().toString(), req.getUrl().toString());
+        }
+
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            if (!loadFavicon) {
+                boolean isFaviconRequest = request.getUrl().toString().toLowerCase().endsWith("/favicon.ico");
+                if (isFaviconRequest) {
+                    return new WebResourceResponse("text", "UTF-8", new InputStream() {
+                        @Override
+                        public int read() {
+                            return 0;
+                        }
+                    });
+                }
+            }
+
+            return super.shouldInterceptRequest(view, request);
         }
     }
 
