@@ -2,8 +2,10 @@ package com.hadiidbouk.appauthwebview;
 
 import android.annotation.SuppressLint;
 import android.net.Uri;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.util.Log;
 
 import net.openid.appauth.Preconditions;
@@ -32,84 +34,84 @@ import javax.net.ssl.X509TrustManager;
  */
 public final class AppAuthConnectionBuilderForTesting implements ConnectionBuilder {
 
-	public static final AppAuthConnectionBuilderForTesting INSTANCE = new AppAuthConnectionBuilderForTesting();
+    public static final AppAuthConnectionBuilderForTesting INSTANCE = new AppAuthConnectionBuilderForTesting();
 
-	private static final String TAG = "ConnBuilder";
+    private static final String TAG = "ConnBuilder";
 
-	private static final int CONNECTION_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(15);
-	private static final int READ_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(10);
+    private static final int CONNECTION_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(15);
+    private static final int READ_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(10);
 
-	private static final String HTTP = "http";
-	private static final String HTTPS = "https";
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
 
-	@SuppressLint("TrustAllX509TrustManager")
-	private static final TrustManager[] ANY_CERT_MANAGER = new TrustManager[]{
-		new X509TrustManager() {
-			public X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
+    @SuppressLint("TrustAllX509TrustManager")
+    private static final TrustManager[] ANY_CERT_MANAGER = new TrustManager[]{
+            new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
 
-			public void checkClientTrusted(X509Certificate[] certs, String authType) {
-			}
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                }
 
-			public void checkServerTrusted(X509Certificate[] certs, String authType) {
-			}
-		}
-	};
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                }
+            }
+    };
 
-	@SuppressLint("BadHostnameVerifier")
-	private static final HostnameVerifier ANY_HOSTNAME_VERIFIER = new HostnameVerifier() {
-		public boolean verify(String hostname, SSLSession session) {
-			return true;
-		}
-	};
+    @SuppressLint("BadHostnameVerifier")
+    private static final HostnameVerifier ANY_HOSTNAME_VERIFIER = new HostnameVerifier() {
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    };
 
-	@Nullable
-	private static final SSLContext TRUSTING_CONTEXT;
+    @Nullable
+    private static final SSLContext TRUSTING_CONTEXT;
 
-	static {
-		SSLContext context;
-		try {
-			context = SSLContext.getInstance("SSL");
-		} catch (NoSuchAlgorithmException e) {
-			Log.e("ConnBuilder", "Unable to acquire SSL context");
-			context = null;
-		}
+    static {
+        SSLContext context;
+        try {
+            context = SSLContext.getInstance("SSL");
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("ConnBuilder", "Unable to acquire SSL context");
+            context = null;
+        }
 
-		SSLContext initializedContext = null;
-		if (context != null) {
-			try {
-				context.init(null, ANY_CERT_MANAGER, new java.security.SecureRandom());
-				initializedContext = context;
-			} catch (KeyManagementException e) {
-				Log.e(TAG, "Failed to initialize trusting SSL context");
-			}
-		}
+        SSLContext initializedContext = null;
+        if (context != null) {
+            try {
+                context.init(null, ANY_CERT_MANAGER, new java.security.SecureRandom());
+                initializedContext = context;
+            } catch (KeyManagementException e) {
+                Log.e(TAG, "Failed to initialize trusting SSL context");
+            }
+        }
 
-		TRUSTING_CONTEXT = initializedContext;
-	}
+        TRUSTING_CONTEXT = initializedContext;
+    }
 
-	private AppAuthConnectionBuilderForTesting() {
-		// no need to construct new instances
-	}
+    private AppAuthConnectionBuilderForTesting() {
+        // no need to construct new instances
+    }
 
-	@NonNull
-	@Override
-	public HttpURLConnection openConnection(@NonNull Uri uri) throws IOException {
-		Preconditions.checkNotNull(uri, "url must not be null");
-		Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
-			"scheme or uri must be http or https");
-		HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
-		conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
-		conn.setReadTimeout(READ_TIMEOUT_MS);
-		conn.setInstanceFollowRedirects(false);
+    @NonNull
+    @Override
+    public HttpURLConnection openConnection(@NonNull Uri uri) throws IOException {
+        Preconditions.checkNotNull(uri, "url must not be null");
+        Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
+                "scheme or uri must be http or https");
+        HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
+        conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+        conn.setReadTimeout(READ_TIMEOUT_MS);
+        conn.setInstanceFollowRedirects(false);
 
-		if (conn instanceof HttpsURLConnection && TRUSTING_CONTEXT != null) {
-			HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
-			httpsConn.setSSLSocketFactory(TRUSTING_CONTEXT.getSocketFactory());
-			httpsConn.setHostnameVerifier(ANY_HOSTNAME_VERIFIER);
-		}
+        if (conn instanceof HttpsURLConnection && TRUSTING_CONTEXT != null) {
+            HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
+            httpsConn.setSSLSocketFactory(TRUSTING_CONTEXT.getSocketFactory());
+            httpsConn.setHostnameVerifier(ANY_HOSTNAME_VERIFIER);
+        }
 
-		return conn;
-	}
+        return conn;
+    }
 }

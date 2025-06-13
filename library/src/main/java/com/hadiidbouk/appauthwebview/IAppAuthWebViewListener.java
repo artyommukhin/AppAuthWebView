@@ -5,15 +5,15 @@ import net.openid.appauth.AuthState;
 public interface IAppAuthWebViewListener {
 
 
-	void onUserAuthorize(AuthState authState);
+    void onUserAuthorize(AuthState authState);
 
-	void showConnectionErrorLayout();
+    void showConnectionErrorLayout();
 
-	void hideConnectionErrorLayout();
+    void hideConnectionErrorLayout();
 
-	void showLoadingLayout();
+    void showLoadingLayout();
 
-	void hideLoadingLayout();
+    void hideLoadingLayout();
 
-	void onLogoutFinish();
+    void onLogoutFinish();
 }

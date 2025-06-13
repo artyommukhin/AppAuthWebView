@@ -1,6 +1,7 @@
 package com.hadiidbouk.sample;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
@@ -54,24 +55,29 @@ public class MainActivity extends AppCompatActivity implements IAppAuthWebViewLi
         appAuthWebView.performLoginRequest();
     }
 
-    @Override public void onUserAuthorize(AuthState authState) {
+    @Override
+    public void onUserAuthorize(AuthState authState) {
         Toast.makeText(this, "Success!\n\nToken : " + authState.getIdToken(), Toast.LENGTH_SHORT).show();
         finish();
     }
 
-    @Override public void showConnectionErrorLayout() {
+    @Override
+    public void showConnectionErrorLayout() {
         mErrorLayout.setVisibility(View.VISIBLE);
     }
 
-    @Override public void hideConnectionErrorLayout() {
+    @Override
+    public void hideConnectionErrorLayout() {
         mErrorLayout.setVisibility(View.INVISIBLE);
     }
 
-    @Override public void showLoadingLayout() {
+    @Override
+    public void showLoadingLayout() {
         mLoadingLayout.setVisibility(View.VISIBLE);
     }
 
-    @Override public void hideLoadingLayout() {
+    @Override
+    public void hideLoadingLayout() {
         mLoadingLayout.setVisibility(View.INVISIBLE);
     }
 
