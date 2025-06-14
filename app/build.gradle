@@ -5,7 +5,7 @@ android {
 
     defaultConfig {
         applicationId "com.hadiidbouk.appauthwebview"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 35
         versionCode 1
         versionName "1.0"
@@ -24,13 +24,14 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
     implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'com.github.artyommukhin:AppAuthWebView:-SNAPSHOT'
+    implementation project(':library')
+    implementation 'net.openid:appauth:0.11.1'
+    implementation platform("org.jetbrains.kotlin:kotlin-bom:2.0.21")
 
     testImplementation 'junit:junit:4.13.2'
 }
